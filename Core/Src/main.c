@@ -46,6 +46,7 @@ UART_HandleTypeDef hlpuart1;
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_lpuart1_tx;
 DMA_HandleTypeDef hdma_usart1_tx;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 RTC_HandleTypeDef hrtc;
 
@@ -60,8 +61,6 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_IPCC_Init(void);
 static void MX_RTC_Init(void);
-static void MX_USART1_UART_Init(void);
-static void MX_LPUART1_UART_Init(void);
 static void MX_RF_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -111,8 +110,6 @@ int main(void)
   MX_GPIO_Init();
   MX_DMA_Init();
   MX_RTC_Init();
-  MX_USART1_UART_Init();
-  MX_LPUART1_UART_Init();
   MX_RF_Init();
   /* USER CODE BEGIN 2 */
 
@@ -248,7 +245,7 @@ static void MX_IPCC_Init(void)
   * @param None
   * @retval None
   */
-static void MX_LPUART1_UART_Init(void)
+void MX_LPUART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN LPUART1_Init 0 */
@@ -296,7 +293,7 @@ static void MX_LPUART1_UART_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USART1_UART_Init(void)
+void MX_USART1_UART_Init(void)
 {
 
   /* USER CODE BEGIN USART1_Init 0 */
@@ -420,6 +417,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 
 }
 
