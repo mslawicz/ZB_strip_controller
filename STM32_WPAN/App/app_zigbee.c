@@ -199,6 +199,21 @@ static struct ZbZclLevelServerCallbacksT LevelServerCallbacks_1 =
 static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 0 OnOff server 1 off 1 */
+  uint8_t endpoint;
+
+  endpoint = ZbZclClusterGetEndpoint(cluster);
+  if (endpoint == SW1_ENDPOINT) 
+  {
+    APP_DBG("onOff_server_1_off");
+    //BSP_LED_Off(LED_RED);
+    (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 0);
+    //TODO request device turn off
+  }
+  else 
+  {
+    /* Unknown endpoint */
+    return ZCL_STATUS_FAILURE;
+  }
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 0 OnOff server 1 off 1 */
 }
@@ -207,6 +222,21 @@ static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, str
 static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 1 OnOff server 1 on 1 */
+  uint8_t endpoint;
+
+  endpoint = ZbZclClusterGetEndpoint(cluster);
+  if (endpoint == SW1_ENDPOINT) 
+  {
+    APP_DBG("onOff_server_1_on");
+    //BSP_LED_On(LED_RED);
+    (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 1);
+    //TODO request device turn on
+  }
+  else 
+  {
+    /* Unknown endpoint */
+    return ZCL_STATUS_FAILURE;
+  }
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 1 OnOff server 1 on 1 */
 }
@@ -215,7 +245,23 @@ static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, stru
 static enum ZclStatusCodeT onOff_server_1_toggle(struct ZbZclClusterT *cluster, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 2 OnOff server 1 toggle 1 */
-  return ZCL_STATUS_SUCCESS;
+  uint8_t attrVal;
+
+  APP_DBG("onOff_server_1_toggle");
+  if (ZbZclAttrRead(cluster, ZCL_ONOFF_ATTR_ONOFF, NULL,
+            &attrVal, sizeof(attrVal), false) != ZCL_STATUS_SUCCESS) 
+  {
+    return ZCL_STATUS_FAILURE;
+  }
+  
+  if (attrVal != 0) 
+  {
+    return onOff_server_1_off(cluster, srcInfo, arg);
+  }
+  else
+  {
+    return onOff_server_1_on(cluster, srcInfo, arg);
+  }
   /* USER CODE END 2 OnOff server 1 toggle 1 */
 }
 
