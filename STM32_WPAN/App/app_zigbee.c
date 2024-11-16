@@ -43,6 +43,7 @@
 #include "zcl/general/zcl.level.h"
 
 /* USER CODE BEGIN Includes */
+#include "main.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -207,7 +208,7 @@ static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, str
     APP_DBG("onOff_server_1_off");
     //BSP_LED_Off(LED_RED);
     (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 0);
-    //TODO request device turn off
+    HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);
   }
   else 
   {
@@ -230,7 +231,7 @@ static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, stru
     APP_DBG("onOff_server_1_on");
     //BSP_LED_On(LED_RED);
     (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 1);
-    //TODO request device turn on
+    HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);
   }
   else 
   {
@@ -580,6 +581,7 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   ZbZclClusterEndpointRegister(zigbee_app_info.levelControl_server_1);
 
   /* USER CODE BEGIN CONFIG_ENDPOINT */
+  APP_DBG("adding cluster attributes");
   /* USER CODE END CONFIG_ENDPOINT */
 }
 
@@ -627,7 +629,7 @@ static void APP_ZIGBEE_NwkForm(void)
       zigbee_app_info.init_after_join = true;
       APP_DBG("Startup done !\n");
       /* USER CODE BEGIN 26 */
-
+      HAL_GPIO_WritePin(LED_B_GPIO_Port, LED_B_Pin, GPIO_PIN_SET);
       /* USER CODE END 26 */
     }
     else

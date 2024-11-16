@@ -68,6 +68,10 @@ void MX_LPUART1_UART_Init(void);
 #define RCC_OSC32_IN_GPIO_Port GPIOC
 #define RCC_OSC32_OUT_Pin GPIO_PIN_15
 #define RCC_OSC32_OUT_GPIO_Port GPIOC
+#define LED_G_Pin GPIO_PIN_0
+#define LED_G_GPIO_Port GPIOB
+#define LED_R_Pin GPIO_PIN_1
+#define LED_R_GPIO_Port GPIOB
 #define USB_DM_Pin GPIO_PIN_11
 #define USB_DM_GPIO_Port GPIOA
 #define USB_DP_Pin GPIO_PIN_12
@@ -78,6 +82,8 @@ void MX_LPUART1_UART_Init(void);
 #define JTCK_GPIO_Port GPIOA
 #define JTDO_Pin GPIO_PIN_3
 #define JTDO_GPIO_Port GPIOB
+#define LED_B_Pin GPIO_PIN_5
+#define LED_B_GPIO_Port GPIOB
 #define STLINK_RX_Pin GPIO_PIN_6
 #define STLINK_RX_GPIO_Port GPIOB
 #define STLINK_TX_Pin GPIO_PIN_7
