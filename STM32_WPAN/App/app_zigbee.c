@@ -591,6 +591,10 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
 
   /* USER CODE BEGIN CONFIG_ENDPOINT */
   APP_DBG("adding cluster attributes");
+
+  /* onOff cluster setup */
+  /* the device starts in off state */
+  (void)ZbZclAttrIntegerWrite(zigbee_app_info.onOff_server_1, ZCL_ONOFF_ATTR_ONOFF, 0);
   /* USER CODE END CONFIG_ENDPOINT */
 }
 
