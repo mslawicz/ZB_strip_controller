@@ -194,8 +194,9 @@ static struct ZbZclLevelServerCallbacksT LevelServerCallbacks_1 =
 };
 
 /* USER CODE BEGIN PV */
-uint8_t manufacturerName[] = "_MS Controllers";
-uint8_t modelName[] = "_WS2812A controller";
+static uint8_t manufacturerName[] = "_MS Controllers";
+static uint8_t modelName[] = "_WS2812A controller";
+static const uint8_t PowerSource = 0x01;  // power source: mains single phase
 /* USER CODE END PV */
 /* Functions Definition ------------------------------------------------------*/
 
@@ -514,6 +515,7 @@ static void APP_ZIGBEE_StackLayersInit(void)
   ZbZclBasicWriteDirect(zigbee_app_info.zb, SW1_ENDPOINT, ZCL_BASIC_ATTR_MFR_NAME, manufacturerName, manufacturerName[0] + 1);
   modelName[0] = strlen((const char*)modelName) - 1;
   ZbZclBasicWriteDirect(zigbee_app_info.zb, SW1_ENDPOINT, ZCL_BASIC_ATTR_MODEL_NAME, modelName, modelName[0] + 1);
+  ZbZclBasicWriteDirect(zigbee_app_info.zb, SW1_ENDPOINT, ZCL_BASIC_ATTR_POWER_SOURCE, &PowerSource, sizeof(PowerSource));
   /* USER CODE END APP_ZIGBEE_StackLayersInit */
 
   /* Configure the joining parameters */
