@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "WS2812A_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -111,7 +111,7 @@ int main(void)
   MX_RTC_Init();
   MX_RF_Init();
   /* USER CODE BEGIN 2 */
-
+  WS2812A_Init();
   /* USER CODE END 2 */
 
   /* Init code for STM32_WPAN */

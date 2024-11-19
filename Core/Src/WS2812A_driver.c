@@ -16,7 +16,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "WS2812A_driver.h"
 
-void testFn(void)
+void WS2812A_Init(void)
 {
     return;
 }

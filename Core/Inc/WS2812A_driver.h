@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 
-void testFn(void);
+void WS2812A_Init(void);
 
 
 #ifdef __cplusplus
