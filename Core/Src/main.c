@@ -50,6 +50,7 @@ DMA_HandleTypeDef hdma_usart1_tx;
 RTC_HandleTypeDef hrtc;
 
 TIM_HandleTypeDef htim16;
+DMA_HandleTypeDef hdma_tim16_ch1;
 
 /* USER CODE BEGIN PV */
 
@@ -123,15 +124,20 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); //XXX test
-
+  //HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); //XXX test
+  uint32_t cnt = 0;
+  const uint8_t PWM_buf[] = {27, 53, 27, 53, 0};
   while (1)
   {
     /* USER CODE END WHILE */
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
-    HAL_GPIO_TogglePin(TEST1_GPIO_Port, TEST1_Pin); //XXX test
+    if(++cnt % 100 == 0)
+    {
+      HAL_GPIO_TogglePin(TEST1_GPIO_Port, TEST1_Pin); //XXX test
+      HAL_TIM_PWM_Start_DMA(&htim16, TIM_CHANNEL_1, (const uint32_t*)PWM_buf, 5);
+    }
   }
   /* USER CODE END 3 */
 }
@@ -486,6 +492,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
+  /* DMA1_Channel3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
 
 }
 
