@@ -124,7 +124,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); //XXX test
   uint32_t cnt = 0;
   while (1)
   {
@@ -132,10 +131,10 @@ int main(void)
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
-    if(++cnt % 200 == 0)
+    if(++cnt % 0x100 == 0)
     {
       HAL_GPIO_TogglePin(TEST1_GPIO_Port, TEST1_Pin); //XXX test
-      WS2812A_test();
+      WS2812A_strip_transmit();   //XXX test
     }
   }
   /* USER CODE END 3 */

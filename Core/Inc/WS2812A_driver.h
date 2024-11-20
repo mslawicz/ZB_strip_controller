@@ -9,8 +9,7 @@ extern "C" {
 #include "stm32wbxx_hal.h"
 
 void WS2812A_Init(TIM_HandleTypeDef* phTIM, uint32_t channel);
-void WS2812A_test(void);
-
+void WS2812A_strip_transmit(void);  //TODO does it have to be a global function?
 
 #ifdef __cplusplus
 } /* extern "C" */
