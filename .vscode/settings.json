@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "zcl.basic.h": "c"
+        "zcl.basic.h": "c",
+        "main.h": "c"
     }
 }

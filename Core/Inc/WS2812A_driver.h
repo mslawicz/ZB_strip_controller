@@ -6,8 +6,10 @@
 extern "C" {
 #endif
 
+#include "stm32wbxx_hal.h"
 
-void WS2812A_Init(void);
+void WS2812A_Init(TIM_HandleTypeDef* phTIM, uint32_t channel);
+void WS2812A_test(void);
 
 
 #ifdef __cplusplus

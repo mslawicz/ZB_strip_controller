@@ -116,7 +116,7 @@ int main(void)
   MX_TIM16_Init();
   MX_RF_Init();
   /* USER CODE BEGIN 2 */
-  WS2812A_Init();
+  WS2812A_Init(&htim16, TIM_CHANNEL_1);
   /* USER CODE END 2 */
 
   /* Init code for STM32_WPAN */
@@ -126,17 +126,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   //HAL_TIM_PWM_Start(&htim16, TIM_CHANNEL_1); //XXX test
   uint32_t cnt = 0;
-  const uint8_t PWM_buf[] = {27, 53, 27, 53, 0};
   while (1)
   {
     /* USER CODE END WHILE */
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
-    if(++cnt % 100 == 0)
+    if(++cnt % 200 == 0)
     {
       HAL_GPIO_TogglePin(TEST1_GPIO_Port, TEST1_Pin); //XXX test
-      HAL_TIM_PWM_Start_DMA(&htim16, TIM_CHANNEL_1, (const uint32_t*)PWM_buf, 5);
+      WS2812A_test();
     }
   }
   /* USER CODE END 3 */
@@ -449,7 +448,7 @@ static void MX_TIM16_Init(void)
   sConfigOC.Pulse = 27;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel(&htim16, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
