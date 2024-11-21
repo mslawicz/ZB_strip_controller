@@ -22,6 +22,7 @@
 #include "stm32wbxx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "WS2812A_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -192,7 +193,11 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  /* call WS2812A handler with constant period */
+  if(HAL_GetTick() % WS2812A_TASK_PERIOD == 0)
+  {
+    UTIL_SEQ_SetTask(WS2812A_TASK, 1);
+  }
   /* USER CODE END SysTick_IRQn 1 */
 }
 

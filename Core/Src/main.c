@@ -124,20 +124,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint32_t cnt = 0;
   while (1)
   {
     /* USER CODE END WHILE */
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
-    if(++cnt % 0x100 == 0)
-    {
-      HAL_GPIO_TogglePin(TEST1_GPIO_Port, TEST1_Pin); //XXX test
-      WS2812A_strip_transmit();   //XXX test
-    }
+
+    /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
 }
 
 /**
