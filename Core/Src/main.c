@@ -130,9 +130,8 @@ int main(void)
     MX_APPE_Process();
 
     /* USER CODE BEGIN 3 */
-
-    /* USER CODE END 3 */
   }
+  /* USER CODE END 3 */
 }
 
 /**

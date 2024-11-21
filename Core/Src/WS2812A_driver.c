@@ -36,6 +36,7 @@ static TIM_HandleTypeDef* pWS2812A_TIM;
 static uint32_t WS2812A_channel;
 static uint8_t WS2812A_PWM_data[WS2812A_PWM_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
+static uint8_t level_current = 0;   /* current light level */
 
 void WS2812A_handler(void);
 
@@ -58,6 +59,7 @@ void WS2812A_Init(TIM_HandleTypeDef* phTIM, uint32_t channel)
 void WS2812A_handler(void)
 {
   uint8_t transmit_request = 1;
+  level_current = 0x40; //XXX test
 
   if(transmit_request)
   {
@@ -67,9 +69,9 @@ void WS2812A_handler(void)
     for(dev_index = 0; dev_index < WS2812A_NUMB_DEV; dev_index++)
     {
       /* place data in order G R B */
-      bit_buffer = (WS2812A_RGB_data[dev_index].G << 16) |
-                   (WS2812A_RGB_data[dev_index].R << 8) |
-                   WS2812A_RGB_data[dev_index].B;
+      bit_buffer = (((WS2812A_RGB_data[dev_index].G * level_current / 0xFF) & 0xFF) << 16) |
+                   (((WS2812A_RGB_data[dev_index].R * level_current / 0xFF) & 0xFF) << 8) |
+                    ((WS2812A_RGB_data[dev_index].B * level_current / 0xFF) & 0xFF);
       uint8_t bit_index;
       uint32_t bit_mask = 0x00800000;
       /* fill buffer with PWM values for all bits of one device */
