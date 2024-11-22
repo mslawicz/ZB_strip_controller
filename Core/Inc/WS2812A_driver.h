@@ -13,7 +13,7 @@ extern "C" {
 #define WS2812A_TASK    (1 << CFG_TASK_LIGHT_HANDLER)
 #define WS2812A_TASK_PERIOD     40  /* task period in ms */
 
-void WS2812A_Init(TIM_HandleTypeDef* phTIM, uint32_t channel);
+void WS2812A_Init(SPI_HandleTypeDef* phSPI);
 
 #ifdef __cplusplus
 } /* extern "C" */

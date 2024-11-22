@@ -52,8 +52,6 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 void MX_USART1_UART_Init(void);
@@ -70,8 +68,8 @@ void MX_LPUART1_UART_Init(void);
 #define RCC_OSC32_IN_GPIO_Port GPIOC
 #define RCC_OSC32_OUT_Pin GPIO_PIN_15
 #define RCC_OSC32_OUT_GPIO_Port GPIOC
-#define WS2812A_OUT_Pin GPIO_PIN_8
-#define WS2812A_OUT_GPIO_Port GPIOB
+#define WS2812A_OUT_Pin GPIO_PIN_7
+#define WS2812A_OUT_GPIO_Port GPIOA
 #define LED_G_Pin GPIO_PIN_0
 #define LED_G_GPIO_Port GPIOB
 #define LED_R_Pin GPIO_PIN_1
