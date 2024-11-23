@@ -36,7 +36,7 @@ typedef struct
 static SPI_HandleTypeDef* pWS2812A_SPI;
 static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
-static uint8_t level_current = 0;   /* current light level */
+static float level_current = 0.0f;   /* current light level <0.0,255.0> */
 
 Light_Params_t light_params =
 {
@@ -87,7 +87,7 @@ void WS2812A_handler(void)
   uint8_t transmit_request = 0;
 
   /* check if the current level must be changed */
-  if(level_current != light_params.level_target)
+  if((uint8_t)level_current != light_params.level_target)
   {
     level_current = light_params.level_target;
     transmit_request = 1;
@@ -102,9 +102,9 @@ void WS2812A_handler(void)
     uint8_t* pBuffer = WS2812A_pulse_buffer;
     
     /* calculate the corrected level */
-    uint8_t level_corrected = level_current * (level_current + 64) / 320;
+    uint8_t level_corrected = (uint8_t)(level_current * (level_current + 64.0f) / 320.0f);
     /* the corrected level must not be 0 when the level_current != 0 */
-    if((level_current > 0) && (level_current < 0xFF))
+    if((level_current >= 1.0f) && (level_corrected < 0xFF))
     {
       ++level_corrected;
     }
@@ -122,8 +122,6 @@ void WS2812A_handler(void)
     }
 
     /* transmit data to all WS2812A devices */
-    HAL_GPIO_WritePin(TEST1_GPIO_Port, TEST1_Pin, GPIO_PIN_SET);  //XXX test
     HAL_SPI_Transmit_DMA(pWS2812A_SPI, WS2812A_pulse_buffer, WS2812A_PULSE_BUF_SIZE);
-    HAL_GPIO_WritePin(TEST1_GPIO_Port, TEST1_Pin, GPIO_PIN_RESET);  //XXX test
   }
 }
