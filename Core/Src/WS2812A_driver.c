@@ -19,11 +19,12 @@
 #include <string.h>
 
 #define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
-#define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device */
+#define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device (24 RGB bits * 5 pulse bits = 120 bits) */
 #define WS2812A_PULSE_BUF_SIZE  (WS2812A_NUMB_DEV * WS2812A_DEV_SIZE)   /* size of WS2812A pulse buffer */
-#define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse for device bit 0 */
-#define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse for device bit 1 */
+#define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
+#define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
+#define WS2812A_START_ON_LEVEL 20  /* light on level on startup */
 
 typedef struct
 {
@@ -37,6 +38,12 @@ static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
 static uint8_t level_current = 0;   /* current light level */
 
+Light_Params_t light_params =
+{
+    .level_target = 0,
+    .level_on = WS2812A_START_ON_LEVEL
+};
+
 void WS2812A_handler(void);
 
 void WS2812A_Init(SPI_HandleTypeDef* phSPI)
@@ -45,10 +52,6 @@ void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 
   /* initialize RGB buffer with white color values */
   memset(WS2812A_RGB_data, WS2812A_RGB_WHITE, sizeof(WS2812A_RGB_data));
-
-  WS2812A_RGB_data[1].R = 255;  //XXX test
-  WS2812A_RGB_data[1].G = 0;  //XXX test
-  WS2812A_RGB_data[1].B = 0;  //XXX test
 
   /* register WS2812A handler task */
   UTIL_SEQ_RegTask(WS2812A_TASK, 0, WS2812A_handler);
@@ -82,24 +85,30 @@ void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 void WS2812A_handler(void)
 {
   uint8_t transmit_request = 1;
-  level_current = 0x20; //XXX test
 
   if(transmit_request)
   {
     /* generate WS2812A pulses and place them in the pulse buffer */
     size_t dev_index;
     uint8_t* pBuffer = WS2812A_pulse_buffer;
+    
+    /* calculate the corrected level */
+    uint8_t level_corrected = level_current * level_current / 0xFF;
+    if((level_current > 0) && (level_current < 0xFF))
+    {
+      ++level_corrected;
+    }
 
     for(dev_index = 0; dev_index < WS2812A_NUMB_DEV; dev_index++)
     {
       /* generate pulses for color green */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].G * level_current / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((WS2812A_RGB_data[dev_index].G * level_corrected / 0xFF) & 0xFF, &pBuffer);
       
       /* generate pulses for color red */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].R * level_current / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((WS2812A_RGB_data[dev_index].R * level_corrected / 0xFF) & 0xFF, &pBuffer);
 
       /* generate pulses for color blue */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].B * level_current / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((WS2812A_RGB_data[dev_index].B * level_corrected / 0xFF) & 0xFF, &pBuffer);
     }
 
     /* transmit data to all WS2812A devices */
