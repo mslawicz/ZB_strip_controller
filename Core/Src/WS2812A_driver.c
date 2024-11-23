@@ -41,7 +41,8 @@ static float level_current = 0.0f;   /* current light level <0.0,255.0> */
 Light_Params_t light_params =
 {
     .level_target = 0,
-    .level_on = WS2812A_START_ON_LEVEL
+    .level_on = WS2812A_START_ON_LEVEL,
+    .transition_time = 0
 };
 
 void WS2812A_handler(void);
@@ -89,9 +90,27 @@ void WS2812A_handler(void)
   /* check if the current level must be changed */
   if((uint8_t)level_current != light_params.level_target)
   {
-    level_current = light_params.level_target;
-    transmit_request = 1;
-    //TODO implement level transition
+    uint8_t level_stored = (uint8_t)level_current;
+    uint32_t numb_of_steps = light_params.transition_time / WS2812A_TASK_PERIOD;
+    if(numb_of_steps > 0)
+    {
+      /* at least one transitional step */
+      float level_change = (light_params.level_target - (float)level_current) / (numb_of_steps + 1.0f);
+      level_current += level_change;
+      light_params.transition_time -= WS2812A_TASK_PERIOD;
+    }
+    else
+    {
+      /* the final level changing step */
+      level_current = light_params.level_target;
+      light_params.transition_time = 0;
+    }
+
+    if((uint8_t)level_current != level_stored)
+    {
+      /* transmit only if current level has been effectively changed */
+      transmit_request = 1;
+    }
   }
 
   /* transmit pulses to WS2812A devices */

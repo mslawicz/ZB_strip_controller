@@ -17,6 +17,7 @@ typedef struct
 {
     uint8_t level_target;   /* the level that the current level must reach; may be either level_on or 0 */
     uint8_t level_on;       /* the target level when the device is swithed on */
+    uint32_t transition_time;  /* remaining level transition time [ms] */
 } Light_Params_t;
 
 
