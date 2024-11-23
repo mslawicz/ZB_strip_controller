@@ -45,6 +45,7 @@
 /* USER CODE BEGIN Includes */
 #include "main.h"
 #include "zcl/general/zcl.basic.h"
+#include "WS2812A_driver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -210,9 +211,9 @@ static enum ZclStatusCodeT onOff_server_1_off(struct ZbZclClusterT *cluster, str
   if (endpoint == SW1_ENDPOINT) 
   {
     APP_DBG("onOff_server_1_off");
-    //BSP_LED_Off(LED_RED);
     (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 0);
     HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_RESET);
+    light_params.level_target = 0;
   }
   else 
   {
@@ -233,9 +234,9 @@ static enum ZclStatusCodeT onOff_server_1_on(struct ZbZclClusterT *cluster, stru
   if (endpoint == SW1_ENDPOINT) 
   {
     APP_DBG("onOff_server_1_on");
-    //BSP_LED_On(LED_RED);
     (void)ZbZclAttrIntegerWrite(cluster, ZCL_ONOFF_ATTR_ONOFF, 1);
     HAL_GPIO_WritePin(LED_G_GPIO_Port, LED_G_Pin, GPIO_PIN_SET);
+    light_params.level_target = light_params.level_on;
   }
   else 
   {
@@ -426,6 +427,13 @@ static enum ZclStatusCodeT colorControl_server_1_step_color_temp(struct ZbZclClu
 static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveToLevelReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 22 LevelControl server 1 move_to_level 1 */
+  APP_DBG("levelControl_server_1_move_to_level, level=%u, trans=%u, with_onoff=%u", req->level, req->transition_time, req->with_onoff);
+  light_params.level_on = req->level;
+  if(req->with_onoff)
+  {
+    light_params.level_target = light_params.level_on;
+    light_params.transition_time = req->transition_time * 100;  /* conversion to milliseconds */
+  }
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 22 LevelControl server 1 move_to_level 1 */
 }
@@ -434,6 +442,7 @@ static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClust
 static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 23 LevelControl server 1 move 1 */
+  APP_DBG("levelControl_server_1_move");
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 23 LevelControl server 1 move 1 */
 }
@@ -442,6 +451,7 @@ static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *clus
 static enum ZclStatusCodeT levelControl_server_1_step(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStepReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 24 LevelControl server 1 step 1 */
+  APP_DBG("levelControl_server_1_step");
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 24 LevelControl server 1 step 1 */
 }
@@ -450,6 +460,7 @@ static enum ZclStatusCodeT levelControl_server_1_step(struct ZbZclClusterT *clus
 static enum ZclStatusCodeT levelControl_server_1_stop(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStopReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 25 LevelControl server 1 stop 1 */
+  APP_DBG("levelControl_server_1_stop");
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 25 LevelControl server 1 stop 1 */
 }
