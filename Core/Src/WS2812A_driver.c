@@ -19,10 +19,10 @@
 #include <string.h>
 
 #define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
-#define WS2812A_DEV_SIZE  9     /* number of bytes per WS2812A device */
+#define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device */
 #define WS2812A_PULSE_BUF_SIZE  (WS2812A_NUMB_DEV * WS2812A_DEV_SIZE)   /* size of WS2812A pulse buffer */
-#define WS2812A_PULSE_ZERO  0x04    /* SPI 3-bit pulse for device bit 0 */
-#define WS2812A_PULSE_ONE   0x06    /* SPI 3-bit pulse for device bit 1 */
+#define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse for device bit 0 */
+#define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse for device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
 
 typedef struct
@@ -54,19 +54,23 @@ void WS2812A_Init(SPI_HandleTypeDef* phSPI)
   UTIL_SEQ_RegTask(WS2812A_TASK, 0, WS2812A_handler);
 }
 
-/* takes 8 bits and generates 8 3-bit pulses in the buffer */
+/* takes 8 bits and generates 8 5-bit pulses in the buffer */
 void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 {
-  uint32_t pulse_buffer = 0;
+  uint64_t pulse_buffer = 0;
   uint8_t bit_index;
 
   for(bit_index = 0; bit_index < 8; bit_index++)
   {
-    pulse_buffer <<= 3;
+    pulse_buffer <<= 5;
     pulse_buffer |= ((color_value & 0x80) != 0 ? WS2812A_PULSE_ONE : WS2812A_PULSE_ZERO);
     color_value <<= 1;
   }
 
+  **ppBuffer = (pulse_buffer >> 32) & 0xFF;
+  (*ppBuffer)++;
+  **ppBuffer = (pulse_buffer >> 24) & 0xFF;
+  (*ppBuffer)++;
   **ppBuffer = (pulse_buffer >> 16) & 0xFF;
   (*ppBuffer)++;
   **ppBuffer = (pulse_buffer >> 8) & 0xFF;
