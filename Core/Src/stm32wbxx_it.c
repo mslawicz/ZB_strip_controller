@@ -198,6 +198,20 @@ void SysTick_Handler(void)
   {
     UTIL_SEQ_SetTask(WS2812A_TASK, 1);
   }
+
+  //XXX test!
+  if(HAL_GetTick() % 1000 == 1)
+  {
+    if(light_params.level_target == 0)
+    {
+      light_params.level_target = 30;
+    }
+    else
+    {
+      light_params.level_target = 0;
+    }
+  }
+
   /* USER CODE END SysTick_IRQn 1 */
 }
 

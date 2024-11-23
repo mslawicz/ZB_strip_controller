@@ -84,8 +84,17 @@ void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 
 void WS2812A_handler(void)
 {
-  uint8_t transmit_request = 1;
+  uint8_t transmit_request = 0;
 
+  /* check if the current level must be changed */
+  if(level_current != light_params.level_target)
+  {
+    level_current = light_params.level_target;
+    transmit_request = 1;
+    //TODO implement level transition
+  }
+
+  /* transmit pulses to WS2812A devices */
   if(transmit_request)
   {
     /* generate WS2812A pulses and place them in the pulse buffer */
@@ -93,7 +102,8 @@ void WS2812A_handler(void)
     uint8_t* pBuffer = WS2812A_pulse_buffer;
     
     /* calculate the corrected level */
-    uint8_t level_corrected = level_current * level_current / 0xFF;
+    uint8_t level_corrected = level_current * (level_current + 64) / 320;
+    /* the corrected level must not be 0 when the level_current != 0 */
     if((level_current > 0) && (level_current < 0xFF))
     {
       ++level_corrected;
