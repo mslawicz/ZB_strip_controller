@@ -12,6 +12,7 @@ extern "C" {
 
 #define WS2812A_TASK    (1 << CFG_TASK_LIGHT_HANDLER)
 #define WS2812A_TASK_PERIOD     40  /* task period in ms */
+#define WS2812A_START_ON_LEVEL 30  /* light on level on startup */
 
 typedef struct
 {

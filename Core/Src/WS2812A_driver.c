@@ -24,7 +24,6 @@
 #define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
 #define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
-#define WS2812A_START_ON_LEVEL 20  /* light on level on startup */
 
 typedef struct
 {

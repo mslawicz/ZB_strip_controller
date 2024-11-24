@@ -65,6 +65,7 @@
 
 /* USER CODE BEGIN PD */
 #define ZCL_LEVEL_ATTR_ONOFF_TRANS_TIME_DEFAULT	10
+#define ATTR_COLOR_TEMP_BEGIN		200
 /* USER CODE END PD */
 
 /* Private macros ------------------------------------------------------------*/
@@ -366,7 +367,7 @@ static enum ZclStatusCodeT colorControl_server_1_step_color_xy(struct ZbZclClust
 static enum ZclStatusCodeT colorControl_server_1_move_to_color_temp(struct ZbZclClusterT *cluster, struct ZbZclColorClientMoveToColorTempReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 13 ColorControl server 1 move_to_color_temp 1 */
-  APP_DBG("colorControl_server_1_move_to_color_temp");
+  APP_DBG("colorControl_server_1_move_to_color_temp, temp=%u, trans=%u", req->color_temp, req->transition_time);
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 13 ColorControl server 1 move_to_color_temp 1 */
 }
@@ -411,7 +412,7 @@ static enum ZclStatusCodeT colorControl_server_1_move_to_hue_sat_enh(struct ZbZc
 static enum ZclStatusCodeT colorControl_server_1_color_loop_set(struct ZbZclClusterT *cluster, struct ZbZclColorClientColorLoopSetReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 18 ColorControl server 1 color_loop_set 1 */
-  APP_DBG("colorControl_server_1_color_loop_set");
+  APP_DBG("colorControl_server_1_color_loop_set, act=%u, dir=%u, hue=%u, trans=%u, flags=%u", req->action, req->direction, req->start_hue, req->transition_time, req->update_flags);
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 18 ColorControl server 1 color_loop_set 1 */
 }
@@ -632,7 +633,7 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   {
     {
       ZCL_COLOR_ATTR_REMAINING_TIME, ZCL_DATATYPE_UNSIGNED_16BIT,
-      ZCL_ATTR_FLAG_REPORTABLE, 0, NULL, {0, 10}, {0, 10}
+      ZCL_ATTR_FLAG_REPORTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
       ZCL_COLOR_ATTR_CURRENT_X, ZCL_DATATYPE_UNSIGNED_16BIT,
@@ -644,27 +645,27 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
     },
     {
       ZCL_COLOR_ATTR_COLOR_TEMP_MIREDS, ZCL_DATATYPE_UNSIGNED_16BIT,
-      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {150, 300}, {150, 300}
+      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
       ZCL_COLOR_ATTR_COLOR_MODE, ZCL_DATATYPE_ENUMERATION_8BIT,
-      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 2}, {0, 2}
+      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
       ZCL_COLOR_ATTR_ENH_COLOR_MODE, ZCL_DATATYPE_ENUMERATION_8BIT,
-      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 2}, {0, 2}
+      ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
         ZCL_COLOR_ATTR_COLOR_LOOP_ACTIVE, ZCL_DATATYPE_UNSIGNED_8BIT,
-        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 1}, {0, 1}
+        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
         ZCL_COLOR_ATTR_COLOR_LOOP_DIR, ZCL_DATATYPE_UNSIGNED_8BIT,
-        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 1}, {0, 1}
+        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
         ZCL_COLOR_ATTR_COLOR_LOOP_TIME, ZCL_DATATYPE_UNSIGNED_16BIT,
-        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 10}, {0, 10}
+        ZCL_ATTR_FLAG_REPORTABLE | ZCL_ATTR_FLAG_PERSISTABLE, 0, NULL, {0, 0}, {0, 0}
     },
     {
         ZCL_COLOR_ATTR_COLOR_TEMP_MIN, ZCL_DATATYPE_UNSIGNED_16BIT,
@@ -682,10 +683,10 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   ZbZclAttrAppendList( zigbee_app_info.colorControl_server_1, colorControl_attr_list, ZCL_ATTR_LIST_LEN(colorControl_attr_list));
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_MODE, ZCL_COLOR_MODE_HS);
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_ENH_COLOR_MODE, ZCL_COLOR_ENH_MODE_CURR_HS);
-  //(void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIN, ATTR_COLOR_TEMP_BEGIN);
-  //(void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MAX, ATTR_COLOR_TEMP_BEGIN + No_Of_Modes - 1);
-  //(void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_STARTUP_COLOR_TEMP, ATTR_COLOR_TEMP_BEGIN);
-  //(void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIREDS,ATTR_COLOR_TEMP_BEGIN);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIN, ATTR_COLOR_TEMP_BEGIN);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MAX, ATTR_COLOR_TEMP_BEGIN + 10);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_STARTUP_COLOR_TEMP, ATTR_COLOR_TEMP_BEGIN);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIREDS,ATTR_COLOR_TEMP_BEGIN);
 
   /* level cluster setup */
   static const struct ZbZclAttrT levelControl_attr_list[] =		/* MS add optional attributes of level control cluster */
@@ -705,6 +706,9 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   };
   ZbZclAttrAppendList( zigbee_app_info.levelControl_server_1, levelControl_attr_list, ZCL_ATTR_LIST_LEN(levelControl_attr_list));
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_ONOFF_TRANS_TIME, ZCL_LEVEL_ATTR_ONOFF_TRANS_TIME_DEFAULT);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_CURRLEVEL, 0);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_ONLEVEL, WS2812A_START_ON_LEVEL);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_STARTUP_CURRLEVEL, WS2812A_START_ON_LEVEL);
 
   /* USER CODE END CONFIG_ENDPOINT */
 }
