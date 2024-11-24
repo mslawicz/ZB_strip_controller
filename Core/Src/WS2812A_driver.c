@@ -108,6 +108,21 @@ void WS2812A_handler(void)
       WS2812A_RGB_data[dev_index] = color_rgb;
     }
 
+    //XXX test of HS to RGB conversion
+    HS_t test_color;
+    test_color.hue = 0;
+    test_color.sat = 0xFF;
+    WS2812A_RGB_data[0] = convert_HS_to_RGB(test_color);
+    test_color.hue = 85;
+    test_color.sat = 0xFF;
+    WS2812A_RGB_data[1] = convert_HS_to_RGB(test_color);
+    test_color.hue = 212;
+    test_color.sat = 0xFF;
+    WS2812A_RGB_data[2] = convert_HS_to_RGB(test_color);
+    test_color.hue = 212;
+    test_color.sat = 0x00;
+    WS2812A_RGB_data[3] = convert_HS_to_RGB(test_color);        
+
     transmit_request = true;
   }
 

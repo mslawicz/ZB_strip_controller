@@ -79,15 +79,15 @@ RGB_t convert_HS_to_RGB(HS_t color_hs)
     RGB_t color_rgb;
     static const RGB_t RGB_nodes[HS_NUMB_SECTORS + 1] =
     {
-        {0xFF, 0, 0},
-        {0, 0xFF, 0},
-        {0, 0, 0xFF},
-        {0xFF, 0, 0}
+        {0xFF, 0, 0},   /* red */
+        {0, 0xFF, 0},   /* green */
+        {0, 0, 0xFF},   /* blue */
+        {0xFF, 0, 0}    /* red again */
     };
-    static const uint8_t MaxHue = 254;     //max value of hue in calculations
-    static const uint8_t Hue_sector_size = (MaxHue + 1) / HS_NUMB_SECTORS;  //size of the hue sector
+    static const uint8_t Max_hue = 254;     //max value of hue in calculations
+    static const uint8_t Hue_sector_size = (Max_hue + 1) / HS_NUMB_SECTORS;  //size of the hue sector
 
-    uint8_t hue = (color_hs.hue > MaxHue) ? MaxHue : color_hs.hue;    //hue in range <0,254>
+    uint8_t hue = (color_hs.hue > Max_hue) ? Max_hue : color_hs.hue;    //hue in range <0,254>
     uint8_t idx = hue / Hue_sector_size;  // index of hue sector <0,2>
     uint8_t hue_sect = hue % Hue_sector_size;  // hue value in a sector <0,HueSectorSize-1>
     uint8_t saturation_floor = (0xFF - color_hs.sat) >> 1;     //saturation-derived component of RGB values
