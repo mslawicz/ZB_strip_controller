@@ -8,6 +8,26 @@ extern "C" {
 
 #include "stm32wbxx_hal.h"
 
+typedef struct
+{
+  uint8_t R;
+  uint8_t G;
+  uint8_t B;
+} RGB_t;
+
+typedef struct
+{
+  uint16_t X;
+  uint16_t Y;
+} XY_t;
+
+typedef struct
+{
+    uint8_t hue; /**< Hue */
+    uint8_t sat; /**< Saturation */
+} HS_t;
+
+RGB_t convert_xy_to_RGB(XY_t color_xy);
 
 #ifdef __cplusplus
 } /* extern "C" */

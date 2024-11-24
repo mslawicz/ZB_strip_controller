@@ -15,6 +15,7 @@
 
 
 #include "WS2812A_driver.h"
+#include "color_conversion.h"
 #include "main.h"
 #include <string.h>
 
@@ -25,13 +26,6 @@
 #define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
 
-typedef struct
-{
-  uint8_t R;
-  uint8_t G;
-  uint8_t B;
-} RGB_t;
-
 static SPI_HandleTypeDef* pWS2812A_SPI;
 static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
@@ -41,7 +35,9 @@ Light_Params_t light_params =
 {
     .level_target = 0,
     .level_on = WS2812A_START_ON_LEVEL,
-    .transition_time = 0
+    .transition_time = 0,
+    .set_color_XY = false,
+    .set_color_HS = false
 };
 
 void WS2812A_handler(void);
