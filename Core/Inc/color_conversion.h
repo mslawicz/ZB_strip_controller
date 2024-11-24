@@ -28,6 +28,7 @@ typedef struct
 } HS_t;
 
 RGB_t convert_xy_to_RGB(XY_t color_xy);
+RGB_t convert_HS_to_RGB(HS_t color_hs);
 
 #ifdef __cplusplus
 } /* extern "C" */

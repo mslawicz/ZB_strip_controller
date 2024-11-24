@@ -71,3 +71,29 @@ float gamma_correction(float val2correct)
 
 	return 1.055 * powf(val2correct, 0.416666) - 0.055;
 }
+
+//convert color data from HS space to RGB value
+RGB_t convert_HS_to_RGB(HS_t color_hs)
+{
+#define HS_NUMB_SECTORS 3       /* number of sectors in the hue range */
+    RGB_t color_rgb;
+    static const RGB_t RGB_nodes[HS_NUMB_SECTORS + 1] =
+    {
+        {0xFF, 0, 0},
+        {0, 0xFF, 0},
+        {0, 0, 0xFF},
+        {0xFF, 0, 0}
+    };
+    static const uint8_t MaxHue = 254;     //max value of hue in calculations
+    static const uint8_t Hue_sector_size = (MaxHue + 1) / HS_NUMB_SECTORS;  //size of the hue sector
+
+    uint8_t hue = (color_hs.hue > MaxHue) ? MaxHue : color_hs.hue;    //hue in range <0,254>
+    uint8_t idx = hue / Hue_sector_size;  // index of hue sector <0,2>
+    uint8_t hue_sect = hue % Hue_sector_size;  // hue value in a sector <0,HueSectorSize-1>
+    uint8_t saturation_floor = (0xFF - color_hs.sat) >> 1;     //saturation-derived component of RGB values
+    // calculate RGB components from hue and saturation and RGB node array
+    color_rgb.R = (RGB_nodes[idx].R + (RGB_nodes[idx + 1].R - RGB_nodes[idx].R) * hue_sect / Hue_sector_size) * color_hs.sat / 0xFF + saturation_floor;
+    color_rgb.G = (RGB_nodes[idx].G + (RGB_nodes[idx + 1].G - RGB_nodes[idx].G) * hue_sect / Hue_sector_size) * color_hs.sat / 0xFF + saturation_floor;
+    color_rgb.B = (RGB_nodes[idx].B + (RGB_nodes[idx + 1].B - RGB_nodes[idx].B) * hue_sect / Hue_sector_size) * color_hs.sat / 0xFF + saturation_floor;
+    return color_rgb;
+}
