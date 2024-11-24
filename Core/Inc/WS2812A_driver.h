@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#include "color_conversion.h"
 #include "stm32wbxx_hal.h"
 #include "app_conf.h"
 #include "stm32_seq.h"
@@ -22,6 +23,8 @@ typedef struct
     uint32_t transition_time;  /* remaining level transition time [ms] */
     bool set_color_XY;      /* set color from XY space */
     bool set_color_HS;      /* set color from HS space */
+    XY_t color_xy;          /* current set color in XY space */
+    HS_t color_hs;          /* current set color in HS space */
 } Light_Params_t;
 
 

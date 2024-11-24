@@ -15,7 +15,6 @@
 
 
 #include "WS2812A_driver.h"
-#include "color_conversion.h"
 #include "main.h"
 #include <string.h>
 
@@ -80,7 +79,37 @@ void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 
 void WS2812A_handler(void)
 {
-  uint8_t transmit_request = 0;
+  bool transmit_request = false;
+
+  /* check if global color must be set */
+  if(light_params.set_color_XY | light_params.set_color_HS)
+  {
+    /* set a global color */
+    RGB_t color_rgb;
+
+    if(light_params.set_color_XY)
+    {
+      /* set a global color from XY space */
+      color_rgb = convert_xy_to_RGB(light_params.color_xy);
+      /* mark as done */
+      light_params.set_color_XY = false;          
+    }
+    else if(light_params.set_color_HS)
+    {
+      /* set a global color from HS space */
+      //TODO implement HS to RGB
+      /* mark as done */
+      light_params.set_color_HS = false;        
+    }
+
+    uint16_t dev_index;
+    for(dev_index = 0; dev_index < WS2812A_NUMB_DEV; dev_index++)
+    {
+      WS2812A_RGB_data[dev_index] = color_rgb;
+    }
+
+    transmit_request = true;
+  }
 
   /* check if the current level must be changed */
   if((uint8_t)level_current != light_params.level_target)
@@ -104,7 +133,7 @@ void WS2812A_handler(void)
     if((uint8_t)level_current != level_stored)
     {
       /* transmit only if current level has been effectively changed */
-      transmit_request = 1;
+      transmit_request = true;
     }
   }
 

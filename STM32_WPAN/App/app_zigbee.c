@@ -341,6 +341,9 @@ static enum ZclStatusCodeT colorControl_server_1_move_to_color_xy(struct ZbZclCl
 {
   /* USER CODE BEGIN 10 ColorControl server 1 move_to_color_xy 1 */
   APP_DBG("colorControl_server_1_move_to_color_xy, xy=(%u,%u), trans=%u", req->color_x, req->color_y, req->transition_time);
+  light_params.color_xy.X = req->color_x;
+  light_params.color_xy.Y = req->color_y;
+  light_params.set_color_XY = true;
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 10 ColorControl server 1 move_to_color_xy 1 */
 }
