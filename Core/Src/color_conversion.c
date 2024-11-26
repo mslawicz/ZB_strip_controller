@@ -2,7 +2,7 @@
 #include <math.h>
 
 //convert color data from xy space to RGB value
-RGB_t convert_xy_to_RGB(XY_t color_xy)
+RGB_t convert_XY_to_RGB(XY_t color_xy)
 {
 #define constrain_from_0(x)		if(x < 0) { x = 0.0; }
 	float gamma_correction(float  vat2correct);
@@ -96,4 +96,13 @@ RGB_t convert_HS_to_RGB(HS_t color_hs)
     color_rgb.G = (RGB_nodes[idx].G + (RGB_nodes[idx + 1].G - RGB_nodes[idx].G) * hue_sect / Hue_sector_size) * color_hs.sat / 0xFF + saturation_floor;
     color_rgb.B = (RGB_nodes[idx].B + (RGB_nodes[idx + 1].B - RGB_nodes[idx].B) * hue_sect / Hue_sector_size) * color_hs.sat / 0xFF + saturation_floor;
     return color_rgb;
+}
+
+//convert color temperature in mireds to Ikea light bulb color XY ( CIE 1931 colorspace )
+XY_t convert_temp_to_XY(uint16_t color_temp)
+{
+	XY_t color_xy;
+	color_xy.X = (uint16_t)(-0.0333105f * color_temp * color_temp + 75.92069f * color_temp + 10641.276f);
+	color_xy.Y - (uint16_t)(-0.0862128f * color_temp * color_temp + 66.42181f * color_temp + 12830.694f);
+	return color_xy;
 }

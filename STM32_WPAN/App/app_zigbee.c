@@ -65,7 +65,9 @@
 
 /* USER CODE BEGIN PD */
 #define ZCL_LEVEL_ATTR_ONOFF_TRANS_TIME_DEFAULT	10
-#define ATTR_COLOR_TEMP_BEGIN		200
+#define ATTR_COLOR_TEMP_BEGIN		100 /* shade skylight mireds */
+#define ATTR_COLOR_TEMP_END 		450 /* incandescent bulb mireds */
+#define ATTR_COLOR_TEMP_DAYLIGHT  175 /* daylight mireds */
 /* USER CODE END PD */
 
 /* Private macros ------------------------------------------------------------*/
@@ -687,9 +689,9 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_MODE, ZCL_COLOR_MODE_HS);
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_ENH_COLOR_MODE, ZCL_COLOR_ENH_MODE_CURR_HS);
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIN, ATTR_COLOR_TEMP_BEGIN);
-  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MAX, ATTR_COLOR_TEMP_BEGIN + 10);
-  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_STARTUP_COLOR_TEMP, ATTR_COLOR_TEMP_BEGIN);
-  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIREDS,ATTR_COLOR_TEMP_BEGIN);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MAX, ATTR_COLOR_TEMP_END);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_STARTUP_COLOR_TEMP, ATTR_COLOR_TEMP_DAYLIGHT);
+  (void)ZbZclAttrIntegerWrite( zigbee_app_info.colorControl_server_1, ZCL_COLOR_ATTR_COLOR_TEMP_MIREDS,ATTR_COLOR_TEMP_DAYLIGHT);
 
   /* level cluster setup */
   static const struct ZbZclAttrT levelControl_attr_list[] =		/* MS add optional attributes of level control cluster */
