@@ -103,6 +103,6 @@ XY_t convert_temp_to_XY(uint16_t color_temp)
 {
 	XY_t color_xy;
 	color_xy.X = (uint16_t)(-0.0333105f * color_temp * color_temp + 75.92069f * color_temp + 10641.276f);
-	color_xy.Y - (uint16_t)(-0.0862128f * color_temp * color_temp + 66.42181f * color_temp + 12830.694f);
+	color_xy.Y = (uint16_t)(-0.0862128f * color_temp * color_temp + 66.42181f * color_temp + 12830.694f);
 	return color_xy;
 }

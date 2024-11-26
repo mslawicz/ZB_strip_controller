@@ -28,8 +28,10 @@ typedef struct
     uint32_t transition_time;  /* remaining level transition time [ms] */
     bool set_color_XY;      /* set color from XY space */
     bool set_color_HS;      /* set color from HS space */
-    XY_t color_xy;          /* current set color in XY space */
-    HS_t color_hs;          /* current set color in HS space */
+    bool set_color_temp;    /* set color temperature */
+    XY_t color_xy;          /* current color in XY space */
+    HS_t color_hs;          /* current color in HS space */
+    uint16_t color_temp;    /* current color temperature in mireds */
     WS2812A_ColorLoopTypeDef color_loop_mode;   /* color loop mode */
 } Light_Params_t;
 

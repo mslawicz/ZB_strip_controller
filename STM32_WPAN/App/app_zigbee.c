@@ -373,6 +373,8 @@ static enum ZclStatusCodeT colorControl_server_1_move_to_color_temp(struct ZbZcl
 {
   /* USER CODE BEGIN 13 ColorControl server 1 move_to_color_temp 1 */
   APP_DBG("colorControl_server_1_move_to_color_temp, temp=%u, trans=%u", req->color_temp, req->transition_time);
+  light_params.color_temp = req->color_temp;
+  light_params.set_color_temp = true;
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 13 ColorControl server 1 move_to_color_temp 1 */
 }

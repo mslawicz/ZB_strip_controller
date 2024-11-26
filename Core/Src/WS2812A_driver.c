@@ -37,6 +37,7 @@ Light_Params_t light_params =
     .transition_time = 0,
     .set_color_XY = false,
     .set_color_HS = false,
+    .set_color_temp = false,
     .color_loop_mode = COLOR_LOOP_STATIC
 };
 
@@ -83,7 +84,7 @@ void WS2812A_handler(void)
   bool transmit_request = false;
 
   /* check if global color must be set */
-  if(light_params.set_color_XY | light_params.set_color_HS)
+  if(light_params.set_color_XY | light_params.set_color_HS | light_params.set_color_temp)
   {
     /* set a global color */
     RGB_t color_rgb;
@@ -101,6 +102,15 @@ void WS2812A_handler(void)
       //TODO implement HS to RGB
       /* mark as done */
       light_params.set_color_HS = false;        
+    }
+    else if(light_params.set_color_temp)
+    {
+      /* convert color temperature to XY */
+      light_params.color_xy = convert_temp_to_XY(light_params.color_temp);
+      /* set a global color from XY space */
+      color_rgb = convert_XY_to_RGB(light_params.color_xy);
+      /* mark as done */
+      light_params.set_color_temp = false;        
     }
 
     uint16_t dev_index;
