@@ -16,6 +16,11 @@ extern "C" {
 #define WS2812A_TASK_PERIOD     40  /* task period in ms */
 #define WS2812A_START_ON_LEVEL 30  /* light on level on startup */
 
+typedef enum
+{
+    COLOR_LOOP_STATIC,
+    COLOR_LOOP_CYCLIC_GROUPS
+} WS2812A_ColorLoopTypeDef;
 typedef struct
 {
     uint8_t level_target;   /* the level that the current level must reach; may be either level_on or 0 */
@@ -25,6 +30,7 @@ typedef struct
     bool set_color_HS;      /* set color from HS space */
     XY_t color_xy;          /* current set color in XY space */
     HS_t color_hs;          /* current set color in HS space */
+    WS2812A_ColorLoopTypeDef color_loop_mode;   /* color loop mode */
 } Light_Params_t;
 
 

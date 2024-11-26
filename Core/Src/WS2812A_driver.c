@@ -36,7 +36,8 @@ Light_Params_t light_params =
     .level_on = WS2812A_START_ON_LEVEL,
     .transition_time = 0,
     .set_color_XY = false,
-    .set_color_HS = false
+    .set_color_HS = false,
+    .color_loop_mode = COLOR_LOOP_STATIC
 };
 
 void WS2812A_handler(void);
@@ -108,7 +109,25 @@ void WS2812A_handler(void)
       WS2812A_RGB_data[dev_index] = color_rgb;
     }       
 
+    /* global color sets color loop mode to static */
+    light_params.color_loop_mode = COLOR_LOOP_STATIC;
+    /* apply change by transmission to devices */
     transmit_request = true;
+  }
+
+  /* check if color loop is active */
+  if(light_params.color_loop_mode != COLOR_LOOP_STATIC)
+  {
+    switch(light_params.color_loop_mode)
+    {
+      case COLOR_LOOP_CYCLIC_GROUPS:
+      break;
+
+      default:
+      break;
+    }
+    /* apply change by transmission to devices */
+    transmit_request = true;    
   }
 
   /* check if the current level must be changed */
