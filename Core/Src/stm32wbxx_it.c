@@ -194,7 +194,7 @@ void SysTick_Handler(void)
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
   /* call WS2812A handler with constant period */
-  if(HAL_GetTick() % WS2812A_TASK_PERIOD == 0)
+  if(HAL_GetTick() % WS2812A_TASK_INTERVAL == 0)
   {
     UTIL_SEQ_SetTask(WS2812A_TASK, 1);
   }

@@ -17,6 +17,7 @@
 #include "WS2812A_driver.h"
 #include "main.h"
 #include <string.h>
+#include <math.h>
 
 #define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
 #define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device (24 RGB bits * 5 pulse bits = 120 bits) */
@@ -29,6 +30,9 @@ static SPI_HandleTypeDef* pWS2812A_SPI;
 static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
 static float level_current = 0.0f;   /* current light level <0.0,255.0> */
+/* number of devices in groups */
+static const uint16_t Groups[] = {1,1,1,1,1,1,1,1};
+static const uint8_t Number_of_groups = sizeof(Groups) / sizeof(Groups[0]);
 
 Light_Params_t light_params =
 {
@@ -38,10 +42,13 @@ Light_Params_t light_params =
     .set_color_XY = false,
     .set_color_HS = false,
     .set_color_temp = false,
-    .color_loop_mode = COLOR_LOOP_STATIC
+    .color_restore = false,
+    .color_loop_mode = COLOR_LOOP_STATIC,
+    .color_rgb = {WS2812A_RGB_WHITE, WS2812A_RGB_WHITE, WS2812A_RGB_WHITE}
 };
 
 void WS2812A_handler(void);
+void color_loop_cycling(float period, bool use_groups);
 
 void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 {
@@ -84,15 +91,14 @@ void WS2812A_handler(void)
   bool transmit_request = false;
 
   /* check if global color must be set */
-  if(light_params.set_color_XY | light_params.set_color_HS | light_params.set_color_temp)
+  if(light_params.set_color_XY | light_params.set_color_HS | light_params.set_color_temp | light_params.color_restore)
   {
     /* set a global color */
-    RGB_t color_rgb;
 
     if(light_params.set_color_XY)
     {
       /* set a global color from XY space */
-      color_rgb = convert_XY_to_RGB(light_params.color_xy);
+      light_params.color_rgb = convert_XY_to_RGB(light_params.color_xy);
       /* mark as done */
       light_params.set_color_XY = false;          
     }
@@ -108,15 +114,20 @@ void WS2812A_handler(void)
       /* convert color temperature to XY */
       light_params.color_xy = convert_temp_to_XY(light_params.color_temp);
       /* set a global color from XY space */
-      color_rgb = convert_XY_to_RGB(light_params.color_xy);
+      light_params.color_rgb = convert_XY_to_RGB(light_params.color_xy);
       /* mark as done */
       light_params.set_color_temp = false;        
+    }
+    else if(light_params.color_restore)
+    {
+      light_params.color_restore = false;
+      /* do nothing else - just restore static RGB color */
     }
 
     uint16_t dev_index;
     for(dev_index = 0; dev_index < WS2812A_NUMB_DEV; dev_index++)
     {
-      WS2812A_RGB_data[dev_index] = color_rgb;
+      WS2812A_RGB_data[dev_index] = light_params.color_rgb;
     }       
 
     /* global color sets color loop mode to static */
@@ -130,7 +141,8 @@ void WS2812A_handler(void)
   {
     switch(light_params.color_loop_mode)
     {
-      case COLOR_LOOP_CYCLIC_GROUPS:
+      case COLOR_LOOP_CYCLIC_GROUPS_FAST:
+      color_loop_cycling(5.0f, true);
       break;
 
       default:
@@ -144,13 +156,13 @@ void WS2812A_handler(void)
   if((uint8_t)level_current != light_params.level_target)
   {
     uint8_t level_stored = (uint8_t)level_current;
-    uint32_t numb_of_steps = light_params.transition_time / WS2812A_TASK_PERIOD;
+    uint32_t numb_of_steps = light_params.transition_time / WS2812A_TASK_INTERVAL;
     if(numb_of_steps > 0)
     {
       /* at least one transitional step */
       float level_change = (light_params.level_target - (float)level_current) / (numb_of_steps + 1.0f);
       level_current += level_change;
-      light_params.transition_time -= WS2812A_TASK_PERIOD;
+      light_params.transition_time -= WS2812A_TASK_INTERVAL;
     }
     else
     {
@@ -195,5 +207,41 @@ void WS2812A_handler(void)
 
     /* transmit data to all WS2812A devices */
     HAL_SPI_Transmit_DMA(pWS2812A_SPI, WS2812A_pulse_buffer, WS2812A_PULSE_BUF_SIZE);
+  }
+}
+
+void color_loop_cycling(float period, bool use_groups)
+{
+  static float phase0 = 0.0f;  // phase of the first device in the hue circle <0,1>
+  uint8_t group;
+  uint16_t dev_index = 0;  /* index of the device to be set */
+  float phase_delta = 0.001f * WS2812A_TASK_INTERVAL / period;
+  HS_t color_hs;
+  RGB_t color_rgb;
+  float phase;
+
+  phase0 += ((light_params.loop_direction == 0) ? 1.0f : -1.0f) * phase_delta;
+  phase0 = fmodf(phase0 + 1.0f, 1.0f);   // the phase is again in the range <0,1>
+  
+  /* set all groups */
+  for(group = 0; group < Number_of_groups; group++)
+  {
+    uint8_t device;
+    phase = phase0;
+    if(use_groups)
+    {
+      phase += (float)group / (float)Number_of_groups;
+    }
+    color_hs.hue = (uint8_t)(phase * 0x100) % 0x100;
+    color_hs.sat = 0xFF;
+    color_rgb = convert_HS_to_RGB(color_hs);
+    /* set all devices in a group */
+    for(device = 0; device < Groups[group]; device++)
+    {
+      if(dev_index < WS2812A_NUMB_DEV)
+      {
+        WS2812A_RGB_data[dev_index++] = color_rgb;
+      }
+    }
   }
 }

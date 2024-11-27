@@ -420,6 +420,15 @@ static enum ZclStatusCodeT colorControl_server_1_color_loop_set(struct ZbZclClus
 {
   /* USER CODE BEGIN 18 ColorControl server 1 color_loop_set 1 */
   APP_DBG("colorControl_server_1_color_loop_set, act=%u, dir=%u, hue=%u, trans=%u, flags=%u", req->action, req->direction, req->start_hue, req->transition_time, req->update_flags);
+  if(req->action != 0)
+  {
+    light_params.loop_direction = req->direction;
+    light_params.color_loop_mode = req->start_hue;
+  }
+  else
+  {
+    light_params.color_restore = true;
+  }
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 18 ColorControl server 1 color_loop_set 1 */
 }

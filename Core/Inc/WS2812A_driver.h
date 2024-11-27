@@ -13,13 +13,13 @@ extern "C" {
 #include <stdbool.h>
 
 #define WS2812A_TASK    (1 << CFG_TASK_LIGHT_HANDLER)
-#define WS2812A_TASK_PERIOD     40  /* task period in ms */
+#define WS2812A_TASK_INTERVAL     40  /* task interval in ms */
 #define WS2812A_START_ON_LEVEL 30  /* light on level on startup */
 
 typedef enum
 {
     COLOR_LOOP_STATIC,
-    COLOR_LOOP_CYCLIC_GROUPS
+    COLOR_LOOP_CYCLIC_GROUPS_FAST
 } WS2812A_ColorLoopTypeDef;
 typedef struct
 {
@@ -29,10 +29,13 @@ typedef struct
     bool set_color_XY;      /* set color from XY space */
     bool set_color_HS;      /* set color from HS space */
     bool set_color_temp;    /* set color temperature */
+    bool color_restore;     /* restore RGB static color */
     XY_t color_xy;          /* current color in XY space */
     HS_t color_hs;          /* current color in HS space */
+    RGB_t color_rgb;        /* current color in RGB space */
     uint16_t color_temp;    /* current color temperature in mireds */
     WS2812A_ColorLoopTypeDef color_loop_mode;   /* color loop mode */
+    uint8_t loop_direction; /* loop direction left or right */
 } Light_Params_t;
 
 
