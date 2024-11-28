@@ -144,6 +144,18 @@ void WS2812A_handler(void)
       case COLOR_LOOP_CYCLIC_GROUPS_FAST:
       color_loop_cycling(5.0f, true);
       break;
+      
+      case COLOR_LOOP_CYCLIC_GROUPS_SLOW:
+      color_loop_cycling(30.0f, true);
+      break;
+
+      case COLOR_LOOP_CYCLIC_ALL_FAST:
+      color_loop_cycling(5.0f, false);
+      break;
+
+      case COLOR_LOOP_CYCLIC_ALL_SLOW:
+      color_loop_cycling(30.0f, false);
+      break;
 
       default:
       break;
@@ -219,18 +231,20 @@ void color_loop_cycling(float period, bool use_groups)
   HS_t color_hs;
   RGB_t color_rgb;
   float phase;
+  float direction = (light_params.loop_direction == 0) ? 1.0f : -1.0f;
 
-  phase0 += ((light_params.loop_direction == 0) ? 1.0f : -1.0f) * phase_delta;
+  phase0 += phase_delta;
   phase0 = fmodf(phase0 + 1.0f, 1.0f);   // the phase is again in the range <0,1>
   
   /* set all groups */
-  for(group = 0; group < Number_of_groups; group++)
+   for(group = 0; group < Number_of_groups; group++)
   {
     uint8_t device;
     phase = phase0;
     if(use_groups)
     {
-      phase += (float)group / (float)Number_of_groups;
+      phase += direction * (float)group / (float)Number_of_groups;
+      phase = fmodf(phase + 1.0f, 1.0f);   // the phase is in the range <0,1>
     }
     color_hs.hue = (uint8_t)(phase * 0x100) % 0x100;
     color_hs.sat = 0xFF;
