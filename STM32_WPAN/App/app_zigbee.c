@@ -423,7 +423,14 @@ static enum ZclStatusCodeT colorControl_server_1_color_loop_set(struct ZbZclClus
   if(req->action != 0)
   {
     light_params.loop_direction = req->direction;
-    light_params.color_loop_mode = req->start_hue;
+    if(req->start_hue >0)
+    {
+      light_params.color_loop_mode = req->start_hue;
+    }
+    else
+    {
+      light_params.color_loop_mode = rand() % COLOR_LOOP_NUMB_MODES;
+    }
   }
   else
   {
