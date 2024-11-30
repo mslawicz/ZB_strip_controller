@@ -22,6 +22,7 @@
 #define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
 #define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device (24 RGB bits * 5 pulse bits = 120 bits) */
 #define WS2812A_PULSE_BUF_SIZE  (WS2812A_NUMB_DEV * WS2812A_DEV_SIZE)   /* size of WS2812A pulse buffer */
+#define WS2812A_NUMB_GROUPS WS2812A_NUMB_DEV  /* number of groups */
 #define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
 #define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
@@ -31,8 +32,7 @@ static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
 static float level_current = 0.0f;   /* current light level <0.0,255.0> */
 /* number of devices in groups */
-static const uint16_t Groups[] = {1,1,1,1,1,1,1,1};
-static const uint8_t Number_of_groups = sizeof(Groups) / sizeof(Groups[0]);
+static uint16_t groups[WS2812A_NUMB_GROUPS];
 
 Light_Params_t light_params =
 {
@@ -56,6 +56,13 @@ void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 
   /* initialize RGB buffer with white color values */
   memset(WS2812A_RGB_data, WS2812A_RGB_WHITE, sizeof(WS2812A_RGB_data));
+
+  /* define groups */
+  uint16_t group;
+  for(group = 0; group < WS2812A_NUMB_GROUPS; group++)
+  {
+    groups[group] = 1;
+  }
 
   /* register WS2812A handler task */
   UTIL_SEQ_RegTask(WS2812A_TASK, 0, WS2812A_handler);
@@ -225,7 +232,7 @@ void WS2812A_handler(void)
 void color_loop_cycling(float period, bool use_groups)
 {
   static float phase0 = 0.0f;  // phase of the first device in the hue circle <0,1>
-  uint8_t group;
+  uint16_t group;
   uint16_t dev_index = 0;  /* index of the device to be set */
   float phase_delta = 0.001f * WS2812A_TASK_INTERVAL / period;
   HS_t color_hs;
@@ -237,20 +244,20 @@ void color_loop_cycling(float period, bool use_groups)
   phase0 = fmodf(phase0 + 1.0f, 1.0f);   // the phase is again in the range <0,1>
   
   /* set all groups */
-   for(group = 0; group < Number_of_groups; group++)
+   for(group = 0; group < WS2812A_NUMB_GROUPS; group++)
   {
-    uint8_t device;
+    uint16_t device;
     phase = phase0;
     if(use_groups)
     {
-      phase += direction * (float)group / (float)Number_of_groups;
+      phase += direction * (float)group / (float)WS2812A_NUMB_GROUPS;
       phase = fmodf(phase + 1.0f, 1.0f);   // the phase is in the range <0,1>
     }
     color_hs.hue = (uint8_t)(phase * 0x100) % 0x100;
     color_hs.sat = 0xFF;
     color_rgb = convert_HS_to_RGB(color_hs);
     /* set all devices in a group */
-    for(device = 0; device < Groups[group]; device++)
+    for(device = 0; device < groups[group]; device++)
     {
       if(dev_index < WS2812A_NUMB_DEV)
       {
