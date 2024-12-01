@@ -22,7 +22,6 @@
 #define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
 #define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device (24 RGB bits * 5 pulse bits = 120 bits) */
 #define WS2812A_PULSE_BUF_SIZE  (WS2812A_NUMB_DEV * WS2812A_DEV_SIZE)   /* size of WS2812A pulse buffer */
-#define WS2812A_NUMB_GROUPS WS2812A_NUMB_DEV  /* number of groups */
 #define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
 #define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
@@ -31,8 +30,8 @@ static SPI_HandleTypeDef* pWS2812A_SPI;
 static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
 static float level_current = 0.0f;   /* current light level <0.0,255.0> */
-/* number of devices in groups */
-static uint16_t groups[WS2812A_NUMB_GROUPS];
+static uint16_t groups[WS2812A_NUMB_DEV]; /* number of devices in groups, <= number of devices */
+static uint16_t number_of_groups = 0;   /* number of groups */
 
 Light_Params_t light_params =
 {
@@ -60,7 +59,8 @@ void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 
   /* define groups */
   uint16_t group;
-  for(group = 0; group < WS2812A_NUMB_GROUPS; group++)
+  number_of_groups = WS2812A_NUMB_DEV;
+  for(group = 0; group < number_of_groups; group++)
   {
     groups[group] = 1;
   }
@@ -245,13 +245,13 @@ void color_loop_cycling(float period, bool use_groups)
   phase0 = fmodf(phase0 + 1.0f, 1.0f);   // the phase is again in the range <0,1>
   
   /* set all groups */
-   for(group = 0; group < WS2812A_NUMB_GROUPS; group++)
+   for(group = 0; group < number_of_groups; group++)
   {
     uint16_t device;
     phase = phase0;
     if(use_groups)
     {
-      phase += direction * (float)group / (float)WS2812A_NUMB_GROUPS;
+      phase += direction * (float)group / (float)number_of_groups;
       phase = fmodf(phase + 1.0f, 1.0f);   // the phase is in the range <0,1>
     }
     color_hs.hue = (uint8_t)(phase * 0x100) % 0x100;
