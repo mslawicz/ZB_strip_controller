@@ -43,7 +43,8 @@ Light_Params_t light_params =
     .set_color_HS = false,
     .set_color_temp = false,
     .color_restore = false,
-    .color_loop_mode = COLOR_LOOP_STATIC,
+    .color_mode = COLOR_STATIC,
+    .color_loop_mode = COLOR_LOOP_CYCLIC_ALL_FAST,
     .color_rgb = {WS2812A_RGB_WHITE, WS2812A_RGB_WHITE, WS2812A_RGB_WHITE}
 };
 
@@ -137,14 +138,14 @@ void WS2812A_handler(void)
       WS2812A_RGB_data[dev_index] = light_params.color_rgb;
     }       
 
-    /* global color sets color loop mode to static */
-    light_params.color_loop_mode = COLOR_LOOP_STATIC;
+    /* global color sets color mode to static */
+    light_params.color_mode = COLOR_STATIC;
     /* apply change by transmission to devices */
     transmit_request = true;
   }
 
-  /* check if color loop is active */
-  if(light_params.color_loop_mode != COLOR_LOOP_STATIC)
+  /* check if color mode loop is active */
+  if(light_params.color_mode == COLOR_LOOP)
   {
     switch(light_params.color_loop_mode)
     {

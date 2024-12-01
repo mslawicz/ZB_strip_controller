@@ -18,7 +18,11 @@ extern "C" {
 
 typedef enum
 {
-    COLOR_LOOP_STATIC,
+    COLOR_STATIC,
+    COLOR_LOOP
+} WS2812A_ColorTypeDef;
+typedef enum
+{
     COLOR_LOOP_CYCLIC_GROUPS_FAST,
     COLOR_LOOP_CYCLIC_GROUPS_SLOW,
     COLOR_LOOP_CYCLIC_ALL_FAST,
@@ -38,6 +42,7 @@ typedef struct
     HS_t color_hs;          /* current color in HS space */
     RGB_t color_rgb;        /* current color in RGB space */
     uint16_t color_temp;    /* current color temperature in mireds */
+    WS2812A_ColorTypeDef color_mode;    /* color mode static or loop effect */
     WS2812A_ColorLoopTypeDef color_loop_mode;   /* color loop mode */
     uint8_t loop_direction; /* loop direction left or right */
 } Light_Params_t;

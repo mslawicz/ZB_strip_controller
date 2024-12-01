@@ -431,6 +431,7 @@ static enum ZclStatusCodeT colorControl_server_1_color_loop_set(struct ZbZclClus
     {
       light_params.color_loop_mode = rand() % COLOR_LOOP_NUMB_MODES;
     }
+    light_params.color_mode = COLOR_LOOP;
   }
   else
   {
