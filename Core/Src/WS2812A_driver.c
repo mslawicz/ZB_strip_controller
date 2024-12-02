@@ -25,13 +25,15 @@
 #define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
 #define WS2812A_PULSE_ONE   0x1C    /* 5-bit SPI pulse creating device bit 1 */
 #define WS2812A_RGB_WHITE 0x7F  /* RGB value for the white color */
+#define MAX_SAT 0xFF
 
 static SPI_HandleTypeDef* pWS2812A_SPI;
 static uint8_t WS2812A_pulse_buffer[WS2812A_PULSE_BUF_SIZE];
 static RGB_t WS2812A_RGB_data[WS2812A_NUMB_DEV];
 static float level_current = 0.0f;   /* current light level <0.0,255.0> */
-static uint16_t groups[WS2812A_NUMB_DEV]; /* number of devices in groups, <= number of devices */
+static uint16_t group_size[WS2812A_NUMB_DEV]; /* number of devices in groups, number of groups <= number of devices */
 static uint16_t number_of_groups = 0;   /* number of groups */
+static WS2812A_ColorLoopTypeDef last_color_loop_mode = COLOR_LOOP_NUMB_MODES;   /* used for mode change detection */
 
 Light_Params_t light_params =
 {
@@ -49,6 +51,7 @@ Light_Params_t light_params =
 
 void WS2812A_handler(void);
 void color_loop_cycling(float period, bool use_groups);
+void color_loop_random(float period, bool use_groups);
 
 void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 {
@@ -62,7 +65,7 @@ void WS2812A_Init(SPI_HandleTypeDef* phSPI)
   number_of_groups = WS2812A_NUMB_DEV;
   for(group = 0; group < number_of_groups; group++)
   {
-    groups[group] = 1;
+    group_size[group] = 1;
   }
 
   /* register WS2812A handler task */
@@ -97,6 +100,11 @@ void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 void WS2812A_handler(void)
 {
   bool transmit_request = false;
+  //XXX test
+  light_params.color_mode = COLOR_LOOP;
+  light_params.color_loop_mode = COLOR_LOOP_RANDOM_GROUPS_FAST;
+  light_params.level_target = 100;
+
 
   /* check if global color must be set */
   if(light_params.set_color_XY | light_params.set_color_HS | light_params.set_color_temp | light_params.color_restore)
@@ -165,11 +173,16 @@ void WS2812A_handler(void)
       color_loop_cycling(30.0f, false);
       break;
 
+      case COLOR_LOOP_RANDOM_GROUPS_FAST:
+      color_loop_random(1.0f, true);
+      break;      
+
       default:
       break;
     }
+    last_color_loop_mode = light_params.color_loop_mode;
     /* apply change by transmission to devices */
-    transmit_request = true;    
+    transmit_request = true; 
   }
 
   /* check if the current level must be changed */
@@ -255,10 +268,10 @@ void color_loop_cycling(float period, bool use_groups)
       phase = fmodf(phase + 1.0f, 1.0f);   // the phase is in the range <0,1>
     }
     color_hs.hue = (uint8_t)(phase * 0x100) % 0x100;
-    color_hs.sat = 0xFF;
+    color_hs.sat = MAX_SAT;
     color_rgb = convert_HS_to_RGB(color_hs);
     /* set all devices in a group */
-    for(device = 0; device < groups[group]; device++)
+    for(device = 0; device < group_size[group]; device++)
     {
       if(dev_index < WS2812A_NUMB_DEV)
       {
@@ -266,4 +279,89 @@ void color_loop_cycling(float period, bool use_groups)
       }
     }
   }
+}
+
+void color_loop_random(float period, bool use_groups)
+{
+  HS_t color_hs;
+  static RGB_t color_rgb_current = {WS2812A_RGB_WHITE, WS2812A_RGB_WHITE, WS2812A_RGB_WHITE};
+  static RGB_t color_rgb_target = {WS2812A_RGB_WHITE, WS2812A_RGB_WHITE, WS2812A_RGB_WHITE};
+  static uint16_t group_active;
+  uint16_t group_index;
+  static float remaining_time;
+  uint16_t device, group;
+  static const float Task_interval = 0.001f * WS2812A_TASK_INTERVAL;
+
+  /* check if the current color equals the target color */
+  if((color_rgb_current.R == color_rgb_target.R) &&
+     (color_rgb_current.G == color_rgb_target.G) &&
+     (color_rgb_current.B == color_rgb_target.B))
+  {
+    /* set new active group; 0 if groups not used */
+    group_active = use_groups ? rand() % number_of_groups : 0;
+    /* set new target color */
+    color_hs.hue = rand() % 0x100;  /* random hue */
+    color_hs.sat = MAX_SAT;
+    color_rgb_target = convert_HS_to_RGB(color_hs);
+    /* set current color from acitve group data */
+    group_index = 0;
+    for(group = 0; group < group_active; group++)
+    {
+      group_index += group_size[group];
+    }
+    color_rgb_current = WS2812A_RGB_data[group_index];
+    /* reset remaining time */
+    remaining_time = period;
+  }
+
+  /* single step current color change */
+  if(remaining_time <= Task_interval)
+  {
+    /* transfer time elapsed */
+    color_rgb_current = color_rgb_target;
+  }
+  else
+  {
+    /* next color changing step */
+    color_rgb_current.R += (int8_t)(((float)color_rgb_target.R - (float)color_rgb_current.R) * Task_interval / remaining_time);
+    color_rgb_current.G += (int8_t)(((float)color_rgb_target.G - (float)color_rgb_current.G) * Task_interval / remaining_time);
+    color_rgb_current.B += (int8_t)(((float)color_rgb_target.B - (float)color_rgb_current.B) * Task_interval / remaining_time);
+    remaining_time -= Task_interval;
+  }
+
+  group_index = 0;
+  for(group = 0; group < number_of_groups; group++)
+  {
+    if((!use_groups) || (group == group_active))
+    {
+      for(device = 0; device < group_size[group]; device++)
+      {
+        WS2812A_RGB_data[group_index + device] = color_rgb_current;
+      }
+    }
+    group_index += group_size[group];
+  }
+
+  // for(group = 0; group < number_of_groups; group++)
+  // {
+  //   if((group == group_active) ||
+  //      (!use_groups) ||
+  //      (light_params.color_loop_mode != last_color_loop_mode))
+  //   {
+  //     /* initialize devices if it is the first pass */
+  //     if((light_params.color_loop_mode != last_color_loop_mode) &&
+  //        ((group == 0) || use_groups))
+  //     {
+  //       color_hs.hue = rand() % 0x100;  /* random hue */
+  //       color_hs.sat = MAX_SAT;
+  //       color_rgb_target = color_rgb_current = convert_HS_to_RGB(color_hs);
+  //     }
+
+  //     for(device = 0; device < group_size[group]; device++)
+  //     {
+  //       WS2812A_RGB_data[group_index + device] = color_rgb_current;
+  //     }
+  //   }
+  //   group_index += group_size[group];
+  // }
 }
