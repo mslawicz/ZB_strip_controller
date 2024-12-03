@@ -292,6 +292,29 @@ void color_loop_random(float period, bool use_groups)
   uint16_t device, group;
   static const float Task_interval = 0.001f * WS2812A_TASK_INTERVAL;
 
+  /* initialize groups if it is the first pass after the loop mode has been changed */
+  if(light_params.color_loop_mode != last_color_loop_mode)
+  {
+    group_index = 0;
+    RGB_t color_rgb_init;
+    for(group = 0; group < number_of_groups; group++)
+    {
+      if((group == 0) || (use_groups))
+      {
+        /* set new init color */
+        color_hs.hue = rand() % 0x100;  /* random hue */
+        color_hs.sat = MAX_SAT;
+        color_rgb_init = convert_HS_to_RGB(color_hs);  
+      }
+
+      for(device = 0; device < group_size[group]; device++)
+      {
+        WS2812A_RGB_data[group_index + device] = color_rgb_init;
+      }
+      group_index += group_size[group];
+    }
+  }
+
   /* check if the current color equals the target color */
   if((color_rgb_current.R == color_rgb_target.R) &&
      (color_rgb_current.G == color_rgb_target.G) &&
@@ -341,27 +364,4 @@ void color_loop_random(float period, bool use_groups)
     }
     group_index += group_size[group];
   }
-
-  // for(group = 0; group < number_of_groups; group++)
-  // {
-  //   if((group == group_active) ||
-  //      (!use_groups) ||
-  //      (light_params.color_loop_mode != last_color_loop_mode))
-  //   {
-  //     /* initialize devices if it is the first pass */
-  //     if((light_params.color_loop_mode != last_color_loop_mode) &&
-  //        ((group == 0) || use_groups))
-  //     {
-  //       color_hs.hue = rand() % 0x100;  /* random hue */
-  //       color_hs.sat = MAX_SAT;
-  //       color_rgb_target = color_rgb_current = convert_HS_to_RGB(color_hs);
-  //     }
-
-  //     for(device = 0; device < group_size[group]; device++)
-  //     {
-  //       WS2812A_RGB_data[group_index + device] = color_rgb_current;
-  //     }
-  //   }
-  //   group_index += group_size[group];
-  // }
 }
