@@ -102,7 +102,7 @@ void WS2812A_handler(void)
   bool transmit_request = false;
   //XXX test
   light_params.color_mode = COLOR_LOOP;
-  light_params.color_loop_mode = COLOR_LOOP_RANDOM_GROUPS_FAST;
+  light_params.color_loop_mode = COLOR_LOOP_RANDOM_ALL_SLOW;
   light_params.level_target = 100;
 
 
@@ -175,7 +175,19 @@ void WS2812A_handler(void)
 
       case COLOR_LOOP_RANDOM_GROUPS_FAST:
       color_loop_random(1.0f, true);
-      break;      
+      break;
+
+      case COLOR_LOOP_RANDOM_GROUPS_SLOW:
+      color_loop_random(10.0f, true);
+      break;
+
+      case COLOR_LOOP_RANDOM_ALL_FAST:
+      color_loop_random(3.0f, false);
+      break;
+
+      case COLOR_LOOP_RANDOM_ALL_SLOW:
+      color_loop_random(30.0f, false);
+      break;       
 
       default:
       break;
