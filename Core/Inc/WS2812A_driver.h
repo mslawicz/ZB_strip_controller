@@ -31,6 +31,7 @@ typedef enum
     COLOR_LOOP_RANDOM_GROUPS_SLOW,
     COLOR_LOOP_RANDOM_ALL_FAST,
     COLOR_LOOP_RANDOM_ALL_SLOW,    
+    COLOR_LOOP_COMET,
     COLOR_LOOP_NUMB_MODES   /* this entry must be the last one */
 } WS2812A_ColorLoopTypeDef;
 typedef struct

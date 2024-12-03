@@ -52,6 +52,7 @@ Light_Params_t light_params =
 void WS2812A_handler(void);
 void color_loop_cycling(float period, bool use_groups);
 void color_loop_random(float period, bool use_groups);
+void color_loop_comet(float travel_time);
 
 void WS2812A_Init(SPI_HandleTypeDef* phSPI)
 {
@@ -102,7 +103,7 @@ void WS2812A_handler(void)
   bool transmit_request = false;
   //XXX test
   light_params.color_mode = COLOR_LOOP;
-  light_params.color_loop_mode = COLOR_LOOP_RANDOM_ALL_SLOW;
+  light_params.color_loop_mode = COLOR_LOOP_COMET;
   light_params.level_target = 100;
 
 
@@ -187,7 +188,11 @@ void WS2812A_handler(void)
 
       case COLOR_LOOP_RANDOM_ALL_SLOW:
       color_loop_random(30.0f, false);
-      break;       
+      break;
+
+      case COLOR_LOOP_COMET:
+      color_loop_comet(0.6f);
+      break;      
 
       default:
       break;
@@ -375,5 +380,33 @@ void color_loop_random(float period, bool use_groups)
       }
     }
     group_index += group_size[group];
+  }
+}
+
+void color_loop_comet(float travel_time)
+{
+  static float step_time = 0.001f * WS2812A_TASK_INTERVAL;    /* current step timer */
+  float step_interval = travel_time / WS2812A_NUMB_DEV;   /* nominal interval of a single step [s] */
+  uint16_t device;
+
+  step_time -= 0.001f * WS2812A_TASK_INTERVAL;
+  if(step_time <= 0.0f)
+  {
+    step_time = step_interval;
+    for(device = 0; device < WS2812A_NUMB_DEV - 1; device++)
+    {
+      WS2812A_RGB_data[device] = WS2812A_RGB_data[device + 1];   
+    }
+    WS2812A_RGB_data[WS2812A_NUMB_DEV - 1].R >>= 1; 
+    WS2812A_RGB_data[WS2812A_NUMB_DEV - 1].G >>= 1;
+    WS2812A_RGB_data[WS2812A_NUMB_DEV - 1].B >>= 1;        
+  }
+
+  if(rand() % 100 == 0)
+  {
+    HS_t color_hs;
+    color_hs.hue = rand() % 0x100;  /* random hue */
+    color_hs.sat = MAX_SAT;
+    WS2812A_RGB_data[WS2812A_NUMB_DEV - 1] = convert_HS_to_RGB(color_hs);    
   }
 }
