@@ -420,23 +420,47 @@ static enum ZclStatusCodeT colorControl_server_1_color_loop_set(struct ZbZclClus
 {
   /* USER CODE BEGIN 18 ColorControl server 1 color_loop_set 1 */
   APP_DBG("colorControl_server_1_color_loop_set, act=%u, dir=%u, hue=%u, trans=%u, flags=%u", req->action, req->direction, req->start_hue, req->transition_time, req->update_flags);
-  if(req->action != 0)
+  if(req->action == 0)
   {
-    light_params.loop_direction = req->direction;
-    if(req->start_hue >0)
-    {
-      light_params.color_loop_mode = req->start_hue;
-    }
-    else
-    {
-      light_params.color_loop_mode = rand() % COLOR_LOOP_NUMB_MODES;
-    }
-    light_params.color_mode = COLOR_LOOP;
+    /* loop off */
+    light_params.color_restore = true;
   }
   else
   {
-    light_params.color_restore = true;
+    /* loop on */
+    light_params.loop_direction = req->direction;
+
+    if(req->action == 1)
+    {
+      /* increment/decrement loop mode */
+      if(light_params.loop_direction == 0)
+      {
+        /* decrement loop mode */
+        light_params.color_loop_mode = (light_params.color_loop_mode > 0) ? light_params.color_loop_mode - 1 : COLOR_LOOP_NUMB_MODES - 1;
+      }
+      else
+      {
+        /* increment loop mode */
+        light_params.color_loop_mode = (light_params.color_loop_mode < COLOR_LOOP_NUMB_MODES - 1) ? light_params.color_loop_mode + 1 : 0;
+      }
+    }
+    else
+    {
+      /* set loop mode */
+      if(req->start_hue > 0)
+      {
+        light_params.color_loop_mode = req->start_hue - 1;
+      }
+      else
+      {
+        /* hue == 0 means random mode */
+        light_params.color_loop_mode = rand() % COLOR_LOOP_NUMB_MODES;
+      }
+    }
+
+    light_params.color_mode = COLOR_LOOP;
   }
+ 
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 18 ColorControl server 1 color_loop_set 1 */
 }

@@ -101,11 +101,6 @@ void bits_to_pulses(uint8_t color_value, uint8_t** ppBuffer)
 void WS2812A_handler(void)
 {
   bool transmit_request = false;
-  //XXX test
-  light_params.color_mode = COLOR_LOOP;
-  light_params.color_loop_mode = COLOR_LOOP_COMET_RARE;
-  light_params.level_target = 100;
-
 
   /* check if global color must be set */
   if(light_params.set_color_XY | light_params.set_color_HS | light_params.set_color_temp | light_params.color_restore)
