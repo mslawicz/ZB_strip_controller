@@ -503,6 +503,7 @@ static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClust
     light_params.level_target = light_params.level_on;
     light_params.transition_time = req->transition_time * 100;  /* conversion to milliseconds */
   }
+  (void)ZbZclAttrIntegerWrite(cluster, ZCL_LEVEL_ATTR_CURRLEVEL, req->level);
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 22 LevelControl server 1 move_to_level 1 */
 }
@@ -675,6 +676,8 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   /* onOff cluster setup */
   /* the device starts in off state */
   (void)ZbZclAttrIntegerWrite(zigbee_app_info.onOff_server_1, ZCL_ONOFF_ATTR_ONOFF, 0);
+  /* level control cluster setup */
+  (void)ZbZclAttrIntegerWrite(zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_CURRLEVEL, 0);
 
   /* color control cluster setup */
   static const struct ZbZclAttrT colorControl_attr_list[] =		/* MS add optional attributes of color control cluster */
