@@ -96,6 +96,7 @@ static void APP_ZIGBEE_ProcessNotifyM0ToM4(void);
 static void APP_ZIGBEE_ProcessRequestM0ToM4(void);
 
 /* USER CODE BEGIN PFP */
+static void APP_ZIGBEE_JoinReq(struct ZigBeeT* zb, void* arg);
 /* USER CODE END PFP */
 
 /* Private variables ---------------------------------------------------------*/
@@ -199,6 +200,7 @@ static struct ZbZclLevelServerCallbacksT LevelServerCallbacks_1 =
 };
 
 /* USER CODE BEGIN PV */
+struct ZbTimerT* joinReqTimer;	//timer for sending join requests
 static uint8_t manufacturerName[] = "_MS Controllers";
 static uint8_t modelName[] = "_WS2812A controller";
 static const uint8_t PowerSource = 0x01;  // power source: mains single phase
@@ -761,6 +763,8 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_ONLEVEL, WS2812A_START_ON_LEVEL);
   (void)ZbZclAttrIntegerWrite( zigbee_app_info.levelControl_server_1, ZCL_LEVEL_ATTR_STARTUP_CURRLEVEL, WS2812A_START_ON_LEVEL);
 
+  joinReqTimer = ZbTimerAlloc(zigbee_app_info.zb, APP_ZIGBEE_JoinReq, NULL);
+  ZbTimerReset(joinReqTimer, 10000);
   /* USER CODE END CONFIG_ENDPOINT */
 }
 
@@ -1177,4 +1181,18 @@ static void APP_ZIGBEE_ProcessRequestM0ToM4(void)
 
 /* USER CODE BEGIN FD_LOCAL_FUNCTIONS */
 
+/* ZbZdoPermitJoinReq message has to be sent to allow permit join for an extra amount of time */
+static void APP_ZIGBEE_JoinReq(struct ZigBeeT* zb, void* arg)
+{
+	struct ZbZdoPermitJoinReqT req;
+	memset(&req, 0, sizeof(req));
+
+	req.destAddr=0xFFFC;
+	req.tcSignificance = true;
+	req.duration = 0xFE;
+	enum ZbStatusCodeT status = ZbZdoPermitJoinReq(zb,&req,NULL,NULL);
+	APP_DBG("ZbZdoPermitJoinReq call (status = 0x%02x)", status);
+
+	(void)ZbTimerReset(joinReqTimer, 60 * 1000);
+}
 /* USER CODE END FD_LOCAL_FUNCTIONS */
