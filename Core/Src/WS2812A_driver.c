@@ -19,7 +19,8 @@
 #include <string.h>
 #include <math.h>
 
-#define WS2812A_NUMB_DEV  8     /* number of WS2812A devices in the strip */
+//#define GRB_ORDER   /* enable for GRB color order */
+#define WS2812A_NUMB_DEV  100     /* number of WS2812A devices in the strip */
 #define WS2812A_DEV_SIZE  15    /* number of bytes per WS2812A device (24 RGB bits * 5 pulse bits = 120 bits) */
 #define WS2812A_PULSE_BUF_SIZE  (WS2812A_NUMB_DEV * WS2812A_DEV_SIZE)   /* size of WS2812A pulse buffer */
 #define WS2812A_PULSE_ZERO  0x10    /* 5-bit SPI pulse creating device bit 0 */
@@ -154,23 +155,23 @@ void WS2812A_handler(void)
     switch(light_params.color_loop_mode)
     {
       case COLOR_LOOP_CYCLIC_GROUPS_FAST:
-      color_loop_cycling(5.0f, true);
+      color_loop_cycling(10.0f, true);
       break;
       
       case COLOR_LOOP_CYCLIC_GROUPS_SLOW:
-      color_loop_cycling(30.0f, true);
+      color_loop_cycling(60.0f, true);
       break;
 
       case COLOR_LOOP_CYCLIC_ALL_FAST:
-      color_loop_cycling(5.0f, false);
+      color_loop_cycling(10.0f, false);
       break;
 
       case COLOR_LOOP_CYCLIC_ALL_SLOW:
-      color_loop_cycling(30.0f, false);
+      color_loop_cycling(60.0f, false);
       break;
 
       case COLOR_LOOP_RANDOM_GROUPS_FAST:
-      color_loop_random(1.0f, true);
+      color_loop_random(0.5f, true);
       break;
 
       case COLOR_LOOP_RANDOM_GROUPS_SLOW:
@@ -178,19 +179,19 @@ void WS2812A_handler(void)
       break;
 
       case COLOR_LOOP_RANDOM_ALL_FAST:
-      color_loop_random(3.0f, false);
+      color_loop_random(5.0f, false);
       break;
 
       case COLOR_LOOP_RANDOM_ALL_SLOW:
-      color_loop_random(30.0f, false);
+      color_loop_random(60.0f, false);
       break;
 
       case COLOR_LOOP_COMET_FREQUENT:
-      color_loop_comet(0.6f, 1.5f);
+      color_loop_comet(1.0f, 3.0f);
       break;
 
       case COLOR_LOOP_COMET_RARE:
-      color_loop_comet(0.6f, 5.0f);
+      color_loop_comet(1.0f, 10.0f);
       break;       
 
       default:
@@ -233,6 +234,7 @@ void WS2812A_handler(void)
     /* generate WS2812A pulses and place them in the pulse buffer */
     size_t dev_index;
     uint8_t* pBuffer = WS2812A_pulse_buffer;
+    uint8_t first_color, middle_color, last_color;
     
     /* calculate the corrected level */
     uint8_t level_corrected = (uint8_t)(level_current * (level_current + 64.0f) / 320.0f);
@@ -244,14 +246,24 @@ void WS2812A_handler(void)
 
     for(dev_index = 0; dev_index < WS2812A_NUMB_DEV; dev_index++)
     {
+#if GRB_ORDER /* GRB color order */
+  first_color = WS2812A_RGB_data[dev_index].G;
+  middle_color = WS2812A_RGB_data[dev_index].R;
+  last_color = WS2812A_RGB_data[dev_index].B;
+#else /* RGB color order */
+  first_color = WS2812A_RGB_data[dev_index].R;
+  middle_color = WS2812A_RGB_data[dev_index].G;
+  last_color = WS2812A_RGB_data[dev_index].B;
+#endif      
+
       /* generate pulses for color green */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].G * level_corrected / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((first_color * level_corrected / 0xFF) & 0xFF, &pBuffer);
       
       /* generate pulses for color red */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].R * level_corrected / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((middle_color * level_corrected / 0xFF) & 0xFF, &pBuffer);
 
       /* generate pulses for color blue */
-      bits_to_pulses((WS2812A_RGB_data[dev_index].B * level_corrected / 0xFF) & 0xFF, &pBuffer);
+      bits_to_pulses((last_color * level_corrected / 0xFF) & 0xFF, &pBuffer);
     }
 
     /* transmit data to all WS2812A devices */
