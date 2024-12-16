@@ -657,6 +657,12 @@ static void APP_ZIGBEE_ConfigEndpoints(void)
      *          .enhanced_supported     //bool
      */
     /* USER CODE BEGIN Color Server Config (endpoint1) */
+    .capabilities =
+        ZCL_COLOR_CAP_HS |
+        ZCL_COLOR_CAP_ENH_HUE |
+        ZCL_COLOR_CAP_COLOR_LOOP |
+        ZCL_COLOR_CAP_XY |
+        ZCL_COLOR_CAP_COLOR_TEMP    
     /* USER CODE END Color Server Config (endpoint1) */
   };
   zigbee_app_info.colorControl_server_1 = ZbZclColorServerAlloc(zigbee_app_info.zb, SW1_ENDPOINT, zigbee_app_info.onOff_server_1, NULL, 0, &colorServerConfig_1, NULL);
