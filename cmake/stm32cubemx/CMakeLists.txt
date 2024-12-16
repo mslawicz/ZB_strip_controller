@@ -98,7 +98,7 @@ target_link_directories(stm32cubemx INTERFACE
     ../../Middlewares/ST/STM32_WPAN/zigbee/lib
 )
 
-target_link_libraries(stm32cubemx INTERFACE 
+target_link_libraries(stm32cubemx INTERFACE
 	:stm32wb_zigbee_wb_lib.a
 )
 
