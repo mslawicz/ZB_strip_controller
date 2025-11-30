@@ -291,7 +291,21 @@ static enum ZclStatusCodeT colorControl_server_1_move_to_hue(struct ZbZclCluster
 static enum ZclStatusCodeT colorControl_server_1_move_hue(struct ZbZclClusterT *cluster, struct ZbZclColorClientMoveHueReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 4 ColorControl server 1 move_hue 1 */
-  APP_DBG("colorControl_server_1_move_hue");
+  APP_DBG("colorControl_server_1_move_hue, mode=%u, rate=%u, mask=%u, override=%u", req->move_mode, req->rate, req->mask, req->override);
+
+  if(req->move_mode == 1)
+  {
+    //increment loop mode
+    light_params.color_loop_mode = (light_params.color_loop_mode < COLOR_LOOP_NUMB_MODES - 1) ? light_params.color_loop_mode + 1 : 0;
+  }
+  else
+  {
+    //decrement loop mode
+    light_params.color_loop_mode = (light_params.color_loop_mode > 0) ? light_params.color_loop_mode - 1 : COLOR_LOOP_NUMB_MODES - 1;
+  }
+
+  light_params.color_mode = COLOR_LOOP;
+
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 4 ColorControl server 1 move_hue 1 */
 }
