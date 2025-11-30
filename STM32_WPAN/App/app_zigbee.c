@@ -524,7 +524,38 @@ static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *clus
 static enum ZclStatusCodeT levelControl_server_1_step(struct ZbZclClusterT *cluster, struct ZbZclLevelClientStepReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 24 LevelControl server 1 step 1 */
-  APP_DBG("levelControl_server_1_step");
+  APP_DBG("levelControl_server_1_step, step=%u, dir=%u, trans=%u, with_onoff=%u", req->size, req->mode, req->transition_time, req->with_onoff);
+
+  if(light_params.level_target != 0)
+  {
+    //currently the brightness is handled only if the light is ON
+    if(req->mode == 0)
+    {
+      //brightness up
+      if(0xFF - light_params.level_target > req->size)
+      {
+        light_params.level_target += req->size;
+      }
+      else
+      {
+        light_params.level_target = 0xFE;
+      }
+    }
+    else
+    {
+      //brightness down
+      if(light_params.level_target > req->size)
+      {
+        light_params.level_target -= req->size;
+      }
+      else
+      {
+        light_params.level_target = 0x01;
+      }
+    }
+    light_params.level_on = light_params.level_target;
+    light_params.transition_time = req->transition_time * 100;  /* conversion to milliseconds */
+    } 
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 24 LevelControl server 1 step 1 */
 }
