@@ -425,3 +425,44 @@ void color_loop_comet(float travel_time, float mean_interval)
     WS2812A_RGB_data[WS2812A_NUMB_DEV - 1] = convert_HS_to_RGB(color_hs);    
   }
 }
+
+/**
+ * @brief Start, stop or change a continuous brightness movement (ramp).
+ *
+ * @param mode  0 = increase brightness toward 0xFF; non-zero = decrease toward 0x01.
+ * @param rate  Movement speed in levels per second. If 0, movement is stopped and the current level is held.
+ *
+ * @note If global `level_current` == 0.0, the function returns immediately (no movement while "off").
+ * @sideeffects Updates global `light_params.level_target` and `light_params.transition_time` (ms).
+ */
+void brightness_move(uint8_t mode, uint8_t rate)
+{
+  if(level_current == 0)
+  {
+    return; /* do nothing when the light is off */
+  }
+
+  if(rate != 0)
+  {
+    //start moving brightness
+    if(mode == 0)
+    {
+      //increase brightness
+      light_params.level_target = 0xFF;
+      light_params.transition_time = (uint32_t)(((float)light_params.level_target - level_current) / (float)rate * 1000.0f);
+    }
+    else
+    {
+      //decrease brightness
+      light_params.level_target = 0x01;
+      light_params.transition_time = (uint32_t)((level_current - (float)light_params.level_target) / (float)rate * 1000.0f);
+    }
+
+  }
+  else
+  {
+    //stop moving brightness
+    light_params.level_target = (uint8_t)level_current;
+    light_params.transition_time = 0;
+  }
+}

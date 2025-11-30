@@ -55,6 +55,7 @@ typedef struct
 
 
 void WS2812A_Init(SPI_HandleTypeDef* phSPI);
+void brightness_move(uint8_t mode, uint8_t rate);
 
 extern Light_Params_t light_params;
 

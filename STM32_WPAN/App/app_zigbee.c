@@ -529,7 +529,8 @@ static enum ZclStatusCodeT levelControl_server_1_move_to_level(struct ZbZclClust
 static enum ZclStatusCodeT levelControl_server_1_move(struct ZbZclClusterT *cluster, struct ZbZclLevelClientMoveReqT *req, struct ZbZclAddrInfoT *srcInfo, void *arg)
 {
   /* USER CODE BEGIN 23 LevelControl server 1 move 1 */
-  APP_DBG("levelControl_server_1_move");
+  APP_DBG("levelControl_server_1_move, mode=%u, rate=%u, with_onoff=%u", req->mode, req->rate, req->with_onoff);
+  brightness_move(req->mode, req->rate);  
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 23 LevelControl server 1 move 1 */
 }
@@ -579,6 +580,7 @@ static enum ZclStatusCodeT levelControl_server_1_stop(struct ZbZclClusterT *clus
 {
   /* USER CODE BEGIN 25 LevelControl server 1 stop 1 */
   APP_DBG("levelControl_server_1_stop");
+  brightness_move(0, 0); //stop any ongoing brightness transition
   return ZCL_STATUS_SUCCESS;
   /* USER CODE END 25 LevelControl server 1 stop 1 */
 }
